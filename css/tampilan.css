@@ -1,0 +1,324 @@
+/* ══════════════════════════════════════════════════════════════
+   TAMPILAN BARU (gaya A) — dimuat SETELAH style.css.
+   Hanya menimpa tampilan. Utama: iPad Air tegak (±820px), juga HP.
+   ══════════════════════════════════════════════════════════════ */
+
+:root {
+  --ink-3: #4b5563;          /* teks sekunder: kontras 7.5:1 */
+  --ink-4: #6b7280;          /* teks petunjuk: kontras 4.8:1 (dulu 2.5:1) */
+  --bg: #f3f6f8;
+  --appbar-h: 60px;          /* dipakai updateFilterBarTop() — jangan diubah */
+  --tabbar-h: 64px;
+  --aman-bawah: env(safe-area-inset-bottom, 0px);
+  --isi-maks: 1040px;
+  --bayang: 0 1px 2px rgba(15,25,35,.06), 0 4px 14px rgba(15,25,35,.05);
+}
+
+body { -webkit-text-size-adjust: 100%; }
+.screen { min-height: 100vh; min-height: 100dvh; }
+
+/* Ikon SVG (sprite di index.html) */
+.ik {
+  width: 1.15em; height: 1.15em; flex-shrink: 0;
+  fill: none; stroke: currentColor; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+  vertical-align: -0.2em;
+}
+
+/* Angka: font utama + lebar angka seragam (tanpa "0" bergaris) */
+.stat-num, .stat-card-num, .member-rate, .member-stat-num, .report-summary-num,
+.report-card-badge, .report-member-num, .export-cat-count, .komisi-count, .date-chip .day, .nav-badge {
+  font-family: var(--font);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Sentuhan cepat & fokus keyboard */
+button, .service-tab, .filter-chip, .toggle, .date-chip, .alasan-opt, .pin-key, .export-cat-item,
+.export-fmt-btn, .member-avatar, .member-info, .report-card-header, .date-picker-btn { touch-action: manipulation; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+
+/* ── LOGIN & PIN ─────────────────────────────────────────── */
+.setup-logo-icon {
+  width: 64px; height: 64px; margin: 0 auto 12px;
+  border-radius: 18px; background: var(--teal); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.setup-logo-icon .ik { width: 34px; height: 34px; }
+.setup-hint { font-size: 12px; color: var(--ink-4); }
+.setup-field input { font-size: 16px; }             /* iOS tidak zoom saat mengetik */
+.pin-logo-icon .ik { width: 34px; height: 34px; color: #5eead4; }
+.pin-key { font-variant-numeric: tabular-nums; }
+
+/* ── HEADER ATAS ─────────────────────────────────────────── */
+.appbar {
+  position: sticky; top: 0; z-index: 100;
+  height: var(--appbar-h);
+  background: #fff; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+}
+.appbar-brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.appbar-logo {
+  width: 36px; height: 36px; border-radius: 11px; flex-shrink: 0;
+  background: var(--teal); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.appbar-logo .ik { width: 20px; height: 20px; }
+.appbar-title { font-size: 16px; font-weight: 800; line-height: 1.15; letter-spacing: -.2px; color: var(--ink); }
+.appbar-sub { font-size: 12px; color: var(--ink-3); }
+.appbar-right { display: flex; align-items: center; gap: 8px; }
+.nav-badge {
+  background: var(--teal-xl); color: var(--teal-d);
+  border: 1px solid var(--teal-l);
+  font-size: 13px; font-weight: 700;
+  padding: 6px 10px; border-radius: 99px; min-width: 0;
+}
+.sync-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; white-space: nowrap;
+  padding: 6px 10px; border-radius: 99px;
+  background: #fffbeb; color: #92400e; border: 1px solid #fde68a;
+}
+.sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; flex-shrink: 0; transition: background .3s; }
+.sync-pill[data-state="connected"] { background: var(--teal-xl); color: var(--teal-d); border-color: var(--teal-l); }
+.sync-pill[data-state="disconnected"] { background: #f3f4f6; color: #374151; border-color: var(--border); }
+
+/* ── MENU BAWAH ──────────────────────────────────────────── */
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 120;
+  background: #fff; border-top: 1px solid var(--border);
+  display: flex; justify-content: center;
+  padding: 0 env(safe-area-inset-right) var(--aman-bawah) env(safe-area-inset-left);
+}
+.tabbar-item {
+  flex: 1; max-width: 200px; height: var(--tabbar-h);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  background: none; border: 0; cursor: pointer; position: relative;
+  font-family: var(--font); font-size: 12px; font-weight: 600; color: var(--ink-3);
+}
+.tabbar-item .ik { width: 24px; height: 24px; }
+.tabbar-item.active { color: var(--teal-d); font-weight: 700; }
+.tabbar-item.active::before {
+  content: ''; position: absolute; top: 0; left: 28%; right: 28%;
+  height: 3px; border-radius: 0 0 3px 3px; background: var(--teal);
+}
+.tabbar-item:active { background: var(--bg); }
+
+.page { padding-bottom: calc(var(--tabbar-h) + var(--aman-bawah)); }
+
+/* Lebar konten di laptop/layar lebar (iPad tegak tidak terpengaruh) */
+.att-header, .filter-bar, .member-list, .dash-content, .report-content {
+  max-width: var(--isi-maks); margin-left: auto; margin-right: auto;
+}
+
+/* ── HALAMAN ABSENSI: kepala ─────────────────────────────── */
+.att-header { padding: 14px 16px 12px; }
+.service-tabs { background: #e8edf1; border-radius: 14px; padding: 4px; gap: 4px; margin-bottom: 12px; }
+.service-tab {
+  height: 44px; border: 0; border-radius: 11px;
+  background: transparent; color: var(--ink-3);
+  font-size: 14px; font-weight: 600;
+}
+.service-tab .ik { width: 18px; height: 18px; }
+.service-tab.active {
+  background: #fff; color: var(--teal-d); font-weight: 700;
+  box-shadow: 0 1px 2px rgba(15,25,35,.08), 0 0 0 1px var(--border);
+}
+.date-banner { background: var(--teal); border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; }
+.date-banner-label { font-size: 12px; color: rgba(255,255,255,.88); text-transform: none; letter-spacing: 0; }
+.date-banner-val { font-size: 16px; }
+.date-picker-btn {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 36px;
+  font-size: 13px; font-weight: 700; color: #fff;
+  background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.35);
+  border-radius: 99px; padding: 6px 12px;
+}
+.date-picker-btn .ik { width: 16px; height: 16px; }
+.date-chip { min-width: 52px; padding: 8px 12px; border-width: 1px; }
+.date-chip .day { font-size: 18px; }
+.date-chip .mon { font-size: 11px; }
+.stats-bar { gap: 8px; }
+.stat-box { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 10px 8px 12px; }
+.stat-num { font-size: 24px; font-weight: 800; }
+.stat-label { font-size: 12px; color: var(--ink-3); text-transform: none; letter-spacing: 0; margin-top: 4px; }
+
+/* ── HALAMAN ABSENSI: filter & cari ──────────────────────── */
+.filter-bar { display: flex; flex-direction: column; padding: 10px 16px 4px; }
+.search-box { order: -1; margin-bottom: 10px; }
+.search-box input {
+  height: 44px; border-width: 1px; border-radius: 12px;
+  background: #fff; font-size: 16px; padding-left: 40px;
+}
+.search-box::before {
+  content: ''; left: 12px; width: 18px; height: 18px;
+  background: var(--ink-4);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='10' cy='10' r='7'/%3E%3Cpath d='M21 21l-6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='10' cy='10' r='7'/%3E%3Cpath d='M21 21l-6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.filter-scroll { gap: 8px; margin-bottom: 8px; padding-bottom: 2px; }
+.filter-chip {
+  min-height: 36px; padding: 6px 14px; gap: 6px;
+  font-size: 13px; font-weight: 600;
+  background: #fff; border-width: 1px;
+}
+.filter-chip .ik { width: 16px; height: 16px; }
+.filter-chip.active { color: #fff !important; }   /* chip aktif selalu teks putih (dulu ungu di atas hitam) */
+
+/* ── HALAMAN ABSENSI: daftar jemaat ──────────────────────── */
+.member-list { padding: 12px 16px calc(96px + var(--aman-bawah)); }
+.member-card {
+  border: 1px solid var(--border); border-radius: 14px;
+  padding: 12px; gap: 12px; min-height: 66px;
+  box-shadow: var(--bayang);
+}
+.member-card.is-hadir { background: #f0fdfa; border-color: #5eead4; }
+.member-card.is-absen-alasan { background: #fffbeb; border-color: #fcd34d; }
+.member-card.alert-absen { border-color: #fca5a5; border-left: 4px solid var(--red); }
+.member-avatar { width: 40px; height: 40px; font-size: 14px; }
+.member-name { font-size: 15px; display: flex; align-items: center; gap: 5px; }
+.member-meta { font-size: 12.5px; color: var(--ink-3); flex-wrap: wrap; row-gap: 2px; }
+.birthday-badge { display: inline-flex; color: #7c3aed; }
+.birthday-badge .ik { width: 15px; height: 15px; }
+.absen-streak { display: inline-flex; align-items: center; gap: 3px; }
+.absen-streak .ik { width: 13px; height: 13px; }
+.toggle { width: 52px; height: 30px; border-radius: 99px; }
+.toggle::before { content: ''; position: absolute; inset: -10px -8px; }   /* area sentuh lebih besar */
+.toggle::after { width: 24px; height: 24px; }
+.toggle.on::after { transform: translateX(22px); }
+.alasan-tag { font-size: 11px; max-width: 84px; }
+.fam-head {
+  font-size: 13px; font-weight: 700; color: #6b21a8;
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 2px 4px;
+}
+.fam-head.pisah { margin-top: 6px; border-top: 1px solid #e9d5ff; padding-top: 14px; }
+.fam-head .ik { width: 16px; height: 16px; }
+
+/* Tombol simpan + tombol ＋ di atas menu bawah */
+.submit-bar {
+  bottom: calc(var(--tabbar-h) + var(--aman-bawah));
+  padding: 10px 84px 10px 16px;
+  background: rgba(255,255,255,.97); z-index: 110;
+  box-shadow: 0 -4px 16px rgba(15,25,35,.06);
+}
+.submit-bar > div { display: none; }
+.submit-btn { height: 52px; }
+.submit-btn .ik { width: 20px; height: 20px; }
+.fab {
+  bottom: calc(var(--tabbar-h) + var(--aman-bawah) + 10px); right: 16px;
+  width: 52px; height: 52px; border-radius: 16px; border: 0; z-index: 115;
+  box-shadow: 0 6px 18px rgba(15,25,35,.25);
+}
+.fab .ik { width: 26px; height: 26px; }
+
+.toast { bottom: calc(var(--tabbar-h) + var(--aman-bawah) + 80px); max-width: calc(100vw - 32px); white-space: normal; text-align: center; }
+
+/* Keadaan kosong */
+.empty-icon { color: var(--ink-4); }
+.empty-icon .ik { width: 44px; height: 44px; stroke-width: 1.6; }
+.empty-text { color: var(--ink-3); }
+
+/* ── JENDELA (modal) ─────────────────────────────────────── */
+.modal-sheet { padding-bottom: calc(32px + var(--aman-bawah)); }
+.form-label { font-size: 12px; color: var(--ink-3); }
+.form-input, .form-select { font-size: 16px; border-width: 1px; background: #fff; }
+.form-btn, .alasan-confirm-btn, .submit-btn { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.form-btn .ik, .alasan-confirm-btn .ik { width: 18px; height: 18px; }
+.alasan-opt { padding: 14px 10px; border-width: 1.5px; }
+.alasan-opt-icon { color: var(--ink-2); }
+.alasan-opt-icon .ik { width: 28px; height: 28px; }
+.alasan-opt.selected .alasan-opt-icon { color: #b45309; }
+.menu-ikon {
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.menu-ikon .ik { width: 22px; height: 22px; }
+.member-detail-avatar .ik { width: 26px; height: 26px; }
+.member-stat-label { font-size: 12px; color: var(--ink-3); }
+.wa-btn .ik { width: 20px; height: 20px; }
+.export-fmt-btn .ik { width: 22px; height: 22px; }
+.export-cat-icon { display: flex; color: var(--ink-2); }
+.export-cat-icon .ik { width: 20px; height: 20px; }
+
+/* ── DASHBOARD & REPORT ──────────────────────────────────── */
+.dash-content, .report-content { padding: 16px; }
+.dash-section-title {
+  font-size: 14px; font-weight: 700; color: var(--ink-2);
+  text-transform: none; letter-spacing: 0;
+  display: flex; align-items: center; gap: 6px;
+}
+.dash-section-title .ik { width: 18px; height: 18px; }
+.stat-card { border-radius: 16px; box-shadow: var(--bayang); }
+.stat-card-num { font-size: 30px; font-weight: 800; }
+.stat-card-label { font-size: 13px; display: flex; align-items: center; gap: 6px; }
+.stat-card-sub { font-size: 12px; color: var(--ink-4); }
+.chart-wrap, .report-card, .report-date-selector { border-radius: 16px; box-shadow: var(--bayang); }
+.alert-card, .bday-card { border: 1px solid var(--border); box-shadow: var(--bayang); }
+.alert-detail .ik { width: 13px; height: 13px; }
+.alert-wa, .bday-card .alert-wa { color: #fff; }
+.alert-wa .ik { width: 18px; height: 18px; }
+.bday-avatar .ik { width: 18px; height: 18px; }
+.report-date-selector label { text-transform: none; letter-spacing: 0; font-size: 13px; }
+.report-date-selector select { font-size: 16px; border-width: 1px; background: #fff; }
+.report-card-title { font-size: 14px; font-weight: 700; }
+.report-card-title .ik { width: 18px; height: 18px; }
+.report-member-name { font-size: 14px; }
+.report-member-komisi { font-size: 12px; }
+.report-summary-num { font-weight: 800; }
+.report-summary-label { font-size: 12px; }
+.report-summary-sub { font-size: 11px; color: var(--ink-4); }
+.filter-chip[id^="rptMode"] { justify-content: center; }
+#rptSortBtn .ik, #rptSelectorDate button .ik, #rptSelectorFollowup button .ik { width: 16px; height: 16px; }
+
+/* ══ iPad tegak & layar lebih lebar (≥700px) ═══════════════ */
+@media (min-width: 700px) {
+  /* Tanggal di kiri, angka Hadir/Belum/Total di kanan — satu baris */
+  .att-header {
+    display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 2.5fr);
+    column-gap: 10px; padding: 16px 20px 14px;
+  }
+  .service-tabs { grid-column: 1 / -1; }
+  .date-banner { grid-column: 1; grid-row: 2; margin-bottom: 0; flex-wrap: wrap; gap: 8px; align-content: center; }
+  .date-banner-left { min-width: 0; flex-basis: 100%; }
+  .date-banner-val { font-size: 17px; line-height: 1.25; }
+  .stats-bar { grid-column: 2; grid-row: 2; }
+  .date-scroll-wrap { grid-column: 1 / -1; grid-row: 3; margin: 12px 0 0; }
+  .stat-box { display: flex; flex-direction: column; justify-content: center; }
+  .stat-num { font-size: 28px; }
+
+  .filter-bar { padding: 12px 20px 4px; }
+
+  /* Daftar jemaat 2 kolom; judul keluarga & pesan selebar penuh */
+  .member-list {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 10px; align-content: start;
+    padding: 14px 20px calc(100px + var(--aman-bawah));
+  }
+  .member-card { margin-bottom: 0; }
+  .member-list > :not(.member-card) { grid-column: 1 / -1; }
+
+  .dash-content, .report-content { padding: 20px; }
+  .alert-list, .bday-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .modal-sheet { max-width: 560px; }
+  .submit-bar { padding-left: 20px; padding-right: 88px; }
+  .fab { right: 20px; }
+}
+
+/* iPad mendatar / laptop: 3 kolom */
+@media (min-width: 1100px) {
+  .member-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* HP: kepala halaman ikut tergulir supaya daftar punya ruang; filter tetap menempel */
+@media (max-width: 699px) {
+  .att-header { position: static; }
+  .filter-bar { top: var(--appbar-h) !important; }
+}
+@media (max-width: 380px) {
+  .appbar-sub { display: none; }
+  .tabbar-item { font-size: 11px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
