@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GPBSI — Absensi Ibadah</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="setupScreen" class="screen">
+  <div class="setup-card">
+    <div class="setup-logo">
+      <div class="setup-logo-icon">⛪</div>
+      <h1>GPBSI</h1>
+      <p>Masuk dengan akun pengurus</p>
+    </div>
+    <div class="setup-field">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="email@gmail.com" autocomplete="username" spellcheck="false">
+    </div>
+    <div class="setup-field">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      <div class="setup-hint">Cukup sekali di perangkat ini. Password tidak disimpan oleh aplikasi.</div>
+    </div>
+    <button class="setup-btn" id="loginBtn" onclick="doLogin()">Masuk</button>
+    <div class="setup-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- PIN SCREEN -->
+<div id="pinScreen" class="screen">
+  <div class="pin-logo">
+    <div class="pin-logo-icon">⛪</div>
+    <h1>GPBSI</h1>
+    <p>Sistem Absensi Ibadah 2026</p>
+  </div>
+  <div class="pin-card">
+    <div class="pin-label" id="pinLabel">Masukkan PIN</div>
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+    </div>
+    <div class="pin-keypad">
+      <div class="pin-key" onclick="pinInput('1')">1</div>
+      <div class="pin-key" onclick="pinInput('2')">2</div>
+      <div class="pin-key" onclick="pinInput('3')">3</div>
+      <div class="pin-key" onclick="pinInput('4')">4</div>
+      <div class="pin-key" onclick="pinInput('5')">5</div>
+      <div class="pin-key" onclick="pinInput('6')">6</div>
+      <div class="pin-key" onclick="pinInput('7')">7</div>
+      <div class="pin-key" onclick="pinInput('8')">8</div>
+      <div class="pin-key" onclick="pinInput('9')">9</div>
+      <div class="pin-key empty"></div>
+      <div class="pin-key" onclick="pinInput('0')">0</div>
+      <div class="pin-key del" onclick="pinDel()">⌫</div>
+    </div>
+    <div class="pin-error" id="pinError"></div>
+  </div>
+</div>
+
+<!-- APP SCREEN -->
+<div id="appScreen" class="screen">
+  <nav class="nav">
+    <div class="nav-brand">GP<span>BSI</span></div>
+    <div class="nav-tabs" id="navTabs">
+      <div class="nav-tab-pill" id="navTabPill"></div>
+      <div class="nav-tab active" id="tabAtt" onclick="switchPage('att')">Absensi</div>
+      <div class="nav-tab" id="tabDash" onclick="switchPage('dash')">Dashboard</div>
+      <div class="nav-tab" id="tabReport" onclick="switchPage('report')">Report</div>
+    </div>
+    <div class="nav-badge" id="navBadge">—</div>
+    <div id="realtimeDot" title="Realtime" style="width:8px;height:8px;border-radius:50%;background:var(--ink-3);flex-shrink:0;transition:background .3s;margin-left:6px;"></div>
+  </nav>
+
+  <!-- ABSENSI PAGE -->
+  <div id="pageAtt" class="page active">
+    <div class="att-header" id="attHeader">
+      <div class="service-tabs" id="serviceTabs"></div>
+      <div class="date-banner">
+        <div class="date-banner-left">
+          <div class="date-banner-label">Tanggal Ibadah</div>
+          <div class="date-banner-val" id="activeDateVal">Memuat...</div>
+        </div>
+        <div class="date-picker-btn" onclick="toggleDatePicker()">Ganti ▾</div>
+      </div>
+      <div class="date-scroll-wrap" id="dateScrollWrap">
+        <div id="dateScroll"></div>
+      </div>
+      <div class="stats-bar">
+        <div class="stat-box">
+          <div class="stat-num hadir" id="statHadir">0</div>
+          <div class="stat-label">Hadir</div>
+          <div class="stat-progress" id="pbHadir" style="width:0%"></div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num absen" id="statAbsen">0</div>
+          <div class="stat-label">Belum</div>
+          <div class="stat-progress" id="pbAbsen" style="width:0%"></div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num total" id="statTotal">0</div>
+          <div class="stat-label">Total</div>
+        </div>
+      </div>
+    </div>
+    <div class="filter-bar" id="filterBar">
+      <div class="filter-scroll" id="komisiFilter"></div>
+      <div class="filter-scroll" id="keluargaFilter" style="margin-bottom:10px;"></div>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Cari nama jemaat..." oninput="debouncedRender()">
+      </div>
+    </div>
+    <div class="member-list" id="memberList"></div>
+    <div class="submit-bar" id="submitBar">
+      <button class="submit-btn" id="submitBtn" onclick="submitBatch()">Simpan perubahan</button>
+      <div style="text-align:center;font-size:11px;color:var(--ink-4);margin-top:6px;">Tersimpan otomatis saat ganti halaman / tanggal</div>
+    </div>
+    <div class="fab" id="fabBtn" onclick="openFabMenu()">＋</div>
+  </div>
+
+  <!-- DASHBOARD PAGE -->
+  <div id="pageDash" class="page">
+    <div class="dash-content" id="dashContent">
+      <div class="empty"><div class="empty-icon">📊</div><div class="empty-text">Memuat dashboard...</div></div>
+    </div>
+  </div>
+
+  <!-- REPORT PAGE -->
+  <div id="pageReport" class="page">
+    <div class="report-content" id="reportContent">
+      <div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Memuat report...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Alasan Absen -->
+<div class="modal-overlay" id="modalAlasan" onclick="closeModalAlasan(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-body">
+      <div style="font-size:17px;font-weight:800;margin-bottom:4px;">Alasan Tidak Hadir</div>
+      <div style="font-size:13px;color:var(--ink-3);" id="alasanMemberName"></div>
+      <div class="alasan-options">
+        <div class="alasan-opt" onclick="selectAlasan('Sakit')">
+          <div class="alasan-opt-icon">🤒</div>
+          <div class="alasan-opt-label">Sakit</div>
+        </div>
+        <div class="alasan-opt" onclick="selectAlasan('Keluar Kota')">
+          <div class="alasan-opt-icon">✈️</div>
+          <div class="alasan-opt-label">Keluar Kota</div>
+        </div>
+        <div class="alasan-opt" onclick="selectAlasan('Pelayanan')">
+          <div class="alasan-opt-icon">🙏</div>
+          <div class="alasan-opt-label">Pelayanan</div>
+        </div>
+        <div class="alasan-opt" onclick="selectAlasan('Tanpa Keterangan')">
+          <div class="alasan-opt-icon">❓</div>
+          <div class="alasan-opt-label">Tanpa Ket.</div>
+        </div>
+      </div>
+      <button class="alasan-confirm-btn" onclick="confirmAlasan()">Konfirmasi</button>
+      <button class="alasan-confirm-btn" style="background:var(--ink-4);margin-top:8px;" onclick="cancelAlasan()">Batal</button>
+      <div style="height:12px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Member Detail -->
+<div class="modal-overlay" id="modalMember" onclick="closeModalMember(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-body" id="modalMemberBody"></div>
+  </div>
+</div>
+
+<!-- MODAL: Edit Profil Jemaat -->
+<div class="modal-overlay" id="modalEdit" onclick="closeModal('modalEdit', event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-body">
+      <div style="font-size:17px;font-weight:800;margin-bottom:20px;">Edit Profil Jemaat</div>
+      <input type="hidden" id="editNamaKey">
+      <div class="form-group">
+        <label class="form-label">Nama (Huruf Kapital)</label>
+        <input type="text" class="form-input" id="editNamaBaru" placeholder="NAMA JEMAAT" style="font-weight:700;text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="editStatus">
+          <option value="Aktif">✅ Aktif</option>
+          <option value="Non-Aktif">⏸️ Non-Aktif</option>
+          <option value="Kuliah">🎓 Kuliah / Luar Negeri</option>
+          <option value="Meninggal">🕊️ Meninggal</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Komisi</label>
+        <select class="form-select" id="editKomisi">
+          <option value="">— Tidak diisi —</option>
+          <option>ANAK</option><option>KOMPRI</option><option>KOMWAN</option>
+          <option>PEMUDA</option><option>REMAJA</option><option>TAMU</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ibadah</label>
+        <select class="form-select" id="editIbadah">
+          <option value="Ibadah 1">Ibadah 1</option>
+          <option value="Ibadah 2">Ibadah 2</option>
+          <option value="Keduanya">Keduanya</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Keluarga (Nama Kepala Keluarga)</label>
+        <input type="text" class="form-input" id="editKeluargaNama" placeholder="Contoh: Aang Chris Harjanto" oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">No. HP / WhatsApp</label>
+        <input type="tel" class="form-input" id="editHpWa" placeholder="08xx-xxxx-xxxx">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Jenis Kelamin</label>
+        <select class="form-select" id="editJenisKelamin">
+          <option value="">— Tidak diisi —</option>
+          <option value="Laki-laki">Laki-laki</option>
+          <option value="Perempuan">Perempuan</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tanggal Lahir</label>
+        <input type="text" class="form-input" id="editTglLahir" placeholder="DD/MM/YYYY">
+      </div>
+      <button class="form-btn" id="editSaveBtn" onclick="saveEditProfile()">💾 Simpan Perubahan</button>
+      <div style="height:16px;"></div>
+      <div style="border-top:1px solid var(--border);padding-top:16px;">
+        <div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:8px;">ZONA BAHAYA</div>
+        <button onclick="deleteJemaat()" style="width:100%;height:44px;background:var(--red-l);color:var(--red);border:1.5px solid var(--red);border-radius:10px;font-size:13px;font-weight:800;font-family:var(--font);cursor:pointer;">🗑️ Hapus Jemaat Ini</button>
+      </div>
+      <div style="height:12px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Tambah Tanggal -->
+<div class="modal-overlay" id="modalTanggal" onclick="closeModal('modalTanggal', event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-body">
+      <div style="font-size:17px;font-weight:800;margin-bottom:20px;">Tambah Tanggal Ibadah</div>
+      <div class="form-group">
+        <label class="form-label">Tanggal</label>
+        <input type="date" class="form-input" id="newTanggal">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ibadah</label>
+        <select class="form-select" id="newTanggalIbadah" onchange="usulkanTanggal()"></select>
+      </div>
+      <button class="form-btn" id="addTanggalBtn" onclick="submitAddTanggal()">Tambah Tanggal</button>
+      <div style="height:12px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Tambah Jemaat -->
+<div class="modal-overlay" id="modalJemaat" onclick="closeModal('modalJemaat', event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-body">
+      <div style="font-size:17px;font-weight:800;margin-bottom:20px;">Tambah Jemaat Baru</div>
+      <div class="form-group">
+        <label class="form-label">Nama Lengkap</label>
+        <input type="text" class="form-input" id="newNama" placeholder="NAMA JEMAAT" oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Komisi</label>
+        <select class="form-select" id="newKomisi">
+          <option>ANAK</option><option>KOMPRI</option><option>KOMWAN</option>
+          <option>PEMUDA</option><option>REMAJA</option><option>TAMU</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ibadah</label>
+        <select class="form-select" id="newIbadah">
+          <option value="Ibadah 1">Ibadah 1</option>
+          <option value="Ibadah 2">Ibadah 2</option>
+          <option value="Keduanya">Keduanya</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Jenis Kelamin</label>
+        <select class="form-select" id="newJenisKelamin">
+          <option value="">— Tidak diisi —</option>
+          <option value="Laki-laki">Laki-laki</option>
+          <option value="Perempuan">Perempuan</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">No. HP / WhatsApp</label>
+        <input type="tel" class="form-input" id="newHpWa" placeholder="08xx-xxxx-xxxx">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tanggal Lahir (opsional)</label>
+        <input type="date" class="form-input" id="newTglLahir">
+      </div>
+      <button class="form-btn" id="addJemaatBtn" onclick="submitAddJemaat()">Tambah Jemaat</button>
+      <div style="height:12px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- FAB MENU -->
+<div class="modal-overlay" id="modalFab" onclick="closeModal('modalFab', event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-body">
+      <div style="font-size:17px;font-weight:800;margin-bottom:16px;">Tambah Data</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div onclick="openAddTanggal()" style="padding:16px;background:var(--teal-xl);border:1.5px solid var(--teal-l);border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;gap:12px;">
+          <div style="font-size:28px;">📅</div>
+          <div>
+            <div style="font-size:15px;font-weight:800;">Tanggal Ibadah Baru</div>
+            <div style="font-size:12px;color:var(--ink-3);margin-top:2px;">Tambah tanggal Minggu / Rabu</div>
+          </div>
+        </div>
+        <div onclick="openAddJemaat()" style="padding:16px;background:var(--blue-l);border:1.5px solid #bfdbfe;border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;gap:12px;">
+          <div style="font-size:28px;">👤</div>
+          <div>
+            <div style="font-size:15px;font-weight:800;">Jemaat Baru</div>
+            <div style="font-size:12px;color:var(--ink-3);margin-top:2px;">Daftarkan anggota baru</div>
+          </div>
+        </div>
+        <div onclick="closeModal('modalFab');doBackup();" style="padding:16px;background:var(--amber-l);border:1.5px solid #fde68a;border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;gap:12px;">
+          <div style="font-size:28px;">💾</div>
+          <div>
+            <div style="font-size:15px;font-weight:800;">Backup Data</div>
+            <div style="font-size:12px;color:var(--ink-3);margin-top:2px;" id="fabBackupSub">Export semua data ke JSON</div>
+          </div>
+        </div>
+        <div onclick="openPengaturan();" style="padding:16px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;gap:12px;">
+          <div style="font-size:28px;">⚙️</div>
+          <div>
+            <div style="font-size:15px;font-weight:800;">Pengaturan</div>
+            <div style="font-size:12px;color:var(--ink-3);margin-top:2px;">Ganti PIN & pengaturan tahun</div>
+          </div>
+        </div>
+      </div>
+      <div style="height:12px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Settings -->
+<div class="modal-overlay" id="modalSettings" onclick="closeModal('modalSettings', event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-body">
+      <div style="font-size:17px;font-weight:800;margin-bottom:20px;">⚙️ Pengaturan</div>
+      
+      <!-- Ganti PIN -->
+      <div style="font-size:13px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Ganti PIN</div>
+      <div class="form-group">
+        <label class="form-label">PIN Lama (4 digit)</label>
+        <input type="password" class="form-input" id="settOldPin" maxlength="4" placeholder="****" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label class="form-label">PIN Baru (4 digit)</label>
+        <input type="password" class="form-input" id="settNewPin" maxlength="4" placeholder="****" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Konfirmasi PIN Baru</label>
+        <input type="password" class="form-input" id="settConfirmPin" maxlength="4" placeholder="****" inputmode="numeric">
+      </div>
+      <button class="form-btn" id="changePinBtn" onclick="changePin()">🔒 Ganti PIN</button>
+
+      <div style="height:20px;"></div>
+
+      <!-- Tahun Aktif -->
+      <div style="font-size:13px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Tahun Aktif</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <select class="form-select" id="settTahun" style="flex:1;"></select>
+        <button class="form-btn" style="width:auto;padding:0 20px;" onclick="changeTahun()">Terapkan</button>
+      </div>
+      <div style="font-size:11px;color:var(--ink-4);margin-top:6px;">Hanya tampilkan data absensi untuk tahun yang dipilih.</div>
+
+      <!-- Backup Data -->
+      <div style="height:20px;"></div>
+      <div style="font-size:13px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Backup Data</div>
+      <div style="font-size:12px;color:var(--ink-3);margin-bottom:10px;">Backup terakhir: <span id="lastBackupLabel" style="font-weight:700;color:var(--ink-2);">—</span></div>
+      <button onclick="doBackup()" style="width:100%;padding:12px;background:var(--amber-l);color:#92400e;border:1.5px solid #fde68a;border-radius:var(--radius-sm);font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer;">💾 Backup Sekarang (JSON)</button>
+      <div style="font-size:11px;color:var(--ink-4);margin-top:6px;">Menyimpan seluruh data jemaat & absensi ke file JSON di perangkat Anda.</div>
+
+      <div style="height:20px;"></div>
+      <div style="font-size:13px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Import Backup</div>
+      <input type="file" id="importFile" accept=".json,application/json" style="display:none" onchange="bacaFileImport(this)">
+      <button onclick="document.getElementById('importFile').click()" style="width:100%;padding:12px;background:var(--blue-l);color:var(--blue);border:1.5px solid #bfdbfe;border-radius:var(--radius-sm);font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer;">📥 Import Backup (JSON)</button>
+      <div style="font-size:11px;color:var(--ink-4);margin-top:6px;">Memindahkan data dari file backup (misalnya dari aplikasi lama). Ringkasan ditampilkan dulu sebelum data ditulis.</div>
+      <div id="importPreview"></div>
+
+      <div style="height:20px;"></div>
+
+      <!-- Akun -->
+      <div style="font-size:13px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Akun</div>
+      <div style="font-size:12px;color:var(--ink-3);margin-bottom:4px;">Masuk sebagai:</div>
+      <div style="font-size:12px;font-family:var(--mono);color:var(--ink-2);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;word-break:break-all;margin-bottom:12px;" id="displayEmail">—</div>
+      <button onclick="doLogout()" style="width:100%;padding:12px;background:var(--red-l);color:var(--red);border:1.5px solid var(--red);border-radius:var(--radius-sm);font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer;">🚪 Keluar dari Akun</button>
+      <div style="font-size:11px;color:var(--ink-4);margin-top:6px;">Setelah keluar, perangkat ini harus login ulang dengan email & password.</div>
+
+      <div style="height:20px;"></div>
+
+      <!-- Data Jemaat -->
+      <div style="height:20px;"></div>
+      <div style="font-size:13px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Data Jemaat</div>
+      <button onclick="exportJemaat()" style="width:100%;padding:12px;background:var(--teal-xl);color:var(--teal);border:1.5px solid var(--teal-l);border-radius:var(--radius-sm);font-size:14px;font-weight:700;font-family:var(--font);cursor:pointer;">📤 Export Data Jemaat (CSV)</button>
+      <div style="font-size:11px;color:var(--ink-4);margin-top:6px;">Download semua data jemaat ke CSV untuk dibuka di Excel.</div>
+
+      <div style="height:20px;"></div>
+
+      <!-- Error Log -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:1px;">Error Log</div>
+        <div style="display:flex;gap:6px;">
+          <button onclick="loadLogViewer()" style="padding:5px 12px;background:var(--blue-l);color:var(--blue);border:1.5px solid #bfdbfe;border-radius:8px;font-size:12px;font-weight:700;font-family:var(--font);cursor:pointer;">🔄 Refresh</button>
+          <button onclick="clearLogs()" style="padding:5px 12px;background:var(--red-l);color:var(--red);border:1.5px solid var(--red);border-radius:8px;font-size:12px;font-weight:700;font-family:var(--font);cursor:pointer;">🗑 Hapus</button>
+        </div>
+      </div>
+      <div id="logViewer" style="max-height:280px;overflow-y:auto;">
+        <div style="color:var(--ink-4);font-size:13px;text-align:center;padding:20px 0;">Klik Refresh untuk muat log</div>
+      </div>
+
+      <div style="height:12px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Export Laporan -->
+<div class="modal-overlay" id="modalExport" onclick="closeModal('modalExport', event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-body">
+      <div style="font-size:17px;font-weight:800;margin-bottom:4px;">📥 Export Laporan</div>
+      <div style="font-size:13px;color:var(--ink-3);margin-bottom:16px;" id="exportDateLabel">—</div>
+
+      <!-- Format -->
+      <div style="font-size:11px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Format</div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <div id="fmtCSV" class="export-fmt-btn active" onclick="setExportFmt('csv')">
+          <span style="font-size:18px;">📄</span>
+          <span>CSV</span>
+        </div>
+        <div id="fmtWA" class="export-fmt-btn" onclick="setExportFmt('wa')">
+          <span style="font-size:18px;">💬</span>
+          <span>WhatsApp</span>
+        </div>
+      </div>
+
+      <div style="font-size:11px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Pilih Kategori</div>
+
+      <!-- Tombol pilih semua / batal -->
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <button onclick="exportSelectAll(true)" style="flex:1;height:32px;background:var(--teal-xl);color:var(--teal);border:1.5px solid var(--teal-l);border-radius:8px;font-size:12px;font-weight:700;font-family:var(--font);cursor:pointer;">Pilih Semua</button>
+        <button onclick="exportSelectAll(false)" style="flex:1;height:32px;background:var(--bg);color:var(--ink-3);border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-weight:700;font-family:var(--font);cursor:pointer;">Batal Semua</button>
+      </div>
+
+      <div id="exportCategoryList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;"></div>
+
+      <button id="exportRunBtn" onclick="runExportLaporan()" style="width:100%;height:48px;background:var(--green);color:white;border:none;border-radius:12px;font-size:15px;font-weight:800;font-family:var(--font);cursor:pointer;">📥 Download CSV</button>
+      <div style="height:12px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: WA Preview -->
+<div class="modal-overlay" id="modalWA" onclick="closeModal('modalWA', event)">
+  <div class="modal-sheet" style="max-height:92vh;">
+    <div class="modal-handle"></div>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="font-size:17px;font-weight:800;">💬 Teks WhatsApp</div>
+        <div style="font-size:11px;color:var(--ink-4);">Preview</div>
+      </div>
+
+      <!-- Preview bubble WA -->
+      <div style="background:#e9fbe5;border-radius:12px;padding:14px 16px;font-size:13px;line-height:1.7;font-family:'Segoe UI',sans-serif;white-space:pre-wrap;word-break:break-word;max-height:42vh;overflow-y:auto;border:1px solid #c3f0b8;margin-bottom:16px;" id="waPreviewText"></div>
+
+      <!-- Tombol aksi -->
+      <button onclick="copyWAText()" id="waCopyBtn" style="width:100%;height:50px;background:#25D366;color:white;border:none;border-radius:12px;font-size:15px;font-weight:800;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+        📋 Salin Teks
+      </button>
+      <div style="font-size:11px;color:var(--ink-4);text-align:center;margin-top:8px;">Tempel langsung ke chat WhatsApp</div>
+      <div style="height:8px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Memuat data...</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- FIREBASE-SDK:START -->
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+<!-- FIREBASE-SDK:END -->
+<script src="js/config.js"></script>
+<script src="js/logic.js"></script>
+<script src="js/db.js"></script>
+<script src="js/app.js"></script>
+<script src="js/absensi.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/report.js"></script>
+<script src="js/pengaturan.js"></script>
+<script>initApp();</script>
+</body>
+</html>
