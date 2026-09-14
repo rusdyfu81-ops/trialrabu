@@ -14,9 +14,9 @@ const FIREBASE_CONFIG = {
 //   peserta  : 'pilihan' = sesuai pilihan Ibadah di profil jemaat; 'semua' = semua jemaat
 //   followup : ikut dihitung di Follow-up dan "Tidak Hadir Kedua Ibadah"
 const IBADAH = [
-  { kode: 'IB1',  nama: 'Ibadah 1',    label: '⛪ Ibadah 1', hari: 0, peserta: 'pilihan', followup: true  },
-  { kode: 'IB2',  nama: 'Ibadah 2',    label: '⛪ Ibadah 2', hari: 0, peserta: 'pilihan', followup: true  },
-  { kode: 'RABU', nama: 'Ibadah Rabu', label: '🙏 Rabu',     hari: 3, peserta: 'semua',   followup: false },
+  { kode: 'IB1',  nama: 'Ibadah 1',    label: 'Ibadah 1', ikon: 'gereja', hari: 0, peserta: 'pilihan', followup: true  },
+  { kode: 'IB2',  nama: 'Ibadah 2',    label: 'Ibadah 2', ikon: 'gereja', hari: 0, peserta: 'pilihan', followup: true  },
+  { kode: 'RABU', nama: 'Ibadah Rabu', label: 'Rabu',     ikon: 'buku',   hari: 3, peserta: 'semua',   followup: false },
 ];
 
 if (typeof module !== 'undefined' && module.exports) module.exports = { FIREBASE_CONFIG, IBADAH };

@@ -54,9 +54,20 @@ async function appLog(level = 'error', fungsi = '', pesan = '', detail = '', ext
 
 function pesanError(e) {
   const c = (e && e.code) || '';
-  if (c === 'permission-denied') return 'Akun ini tidak punya izin mengakses data.';
-  if (c === 'unavailable') return 'Tidak ada koneksi ke server.';
+  if (c === 'permission-denied') return 'Akun ini tidak punya izin mengakses data (cek Rules di Firebase).';
+  if (c === 'unavailable') return 'Tidak ada koneksi ke server. Coba lagi.';
   return (e && e.message) || String(e);
+}
+
+// Ikon SVG dari sprite di index.html (#i-<nama>)
+function ikon(nama) {
+  return `<svg class="ik" aria-hidden="true"><use href="#i-${nama}"/></svg>`;
+}
+
+// Emoji kategori (dipakai juga di teks WhatsApp) → ikon untuk tampilan
+function ikonDariEmoji(e) {
+  const peta = { '✗': 'x-bulat', '🚫': 'x-bulat', '👶': 'anak', '👥': 'keluarga', '📋': 'daftar', '⚠️': 'peringatan', '🚨': 'peringatan', '🔴': 'peringatan' };
+  return ikon(peta[e] || 'daftar');
 }
 
 // Tulis ke Firestore TANPA menunggu server: Firestore menyimpan di perangkat dulu dan mengirim saat online
@@ -77,6 +88,10 @@ function realtimeSetDot(state) {
   const titles = { connecting: 'Menunggu sinkron ke server...', connected: 'Tersinkron ✓', disconnected: 'Offline — perubahan disimpan di perangkat' };
   dot.style.background = colors[state] || colors.disconnected;
   dot.title = titles[state] || '';
+  const label = document.getElementById('syncLabel');
+  if (label) label.textContent = { connecting: 'Menyinkron', connected: 'Tersinkron', disconnected: 'Offline' }[state] || '';
+  const pill = document.getElementById('syncPill');
+  if (pill) { pill.dataset.state = state; pill.title = dot.title; }
 }
 
 function perbaruiIndikator() {
@@ -281,9 +296,10 @@ async function verifyPin() {
         document.getElementById('pinError').textContent = `PIN salah. Sisa ${5 - fails}x percobaan.`;
       }
     }
-  } catch {
+  } catch (e) {
+    // Tampilkan penyebab sebenarnya (mis. izin ditolak), bukan selalu "tidak ada koneksi"
     pinError();
-    document.getElementById('pinError').textContent = 'Tidak ada koneksi. Coba lagi.';
+    document.getElementById('pinError').textContent = pesanError(e);
   }
 }
 

@@ -4,7 +4,7 @@ function renderReport() {
   if (!RAW) return;
   const content = document.getElementById('reportContent');
   const allDates = [...new Set(IBADAH.flatMap(ib => RAW.tanggals[ib.nama] || []))].sort();
-  if (!allDates.length) { content.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Belum ada data</div></div>'; return; }
+  if (!allDates.length) { content.innerHTML = '<div class="empty"><div class="empty-icon">' + ikon('dokumen') + '</div><div class="empty-text">Belum ada data</div></div>'; return; }
   const latestDate = allDates[allDates.length-1];
   // Follow-up hanya untuk tanggal ibadah Minggu
   const fuDates = [...new Set(IBADAH.filter(ib => ib.followup).flatMap(ib => RAW.tanggals[ib.nama] || []))].sort();
@@ -19,18 +19,18 @@ function renderReport() {
       <div class="filter-chip active" id="rptModeDate" onclick="setReportMode('date')" style="flex:1;justify-content:center;min-width:80px;">Per Tanggal</div>
       <div class="filter-chip" id="rptModeMonth" onclick="setReportMode('month')" style="flex:1;justify-content:center;min-width:80px;">Per Bulan</div>
       <div class="filter-chip" id="rptModeYear" onclick="setReportMode('year')" style="flex:1;justify-content:center;min-width:80px;">Per Tahun</div>
-      <div class="filter-chip" id="rptModeFollowup" onclick="setReportMode('followup')" style="flex:1;justify-content:center;min-width:80px;">🙏 Follow-up</div>
+      <div class="filter-chip" id="rptModeFollowup" onclick="setReportMode('followup')" style="flex:1;justify-content:center;min-width:80px;">${ikon('hati')} Follow-up</div>
     </div>
     <div id="rptSelectorDate"><select onchange="renderReportForDate(this.value)" id="reportDateSelect">${dateOpts}</select>
       <div style="display:flex;gap:8px;margin-top:10px;">
-        <button onclick="openExportModal()" style="flex:1;height:40px;background:var(--green);color:white;border:none;border-radius:10px;font-size:13px;font-weight:800;font-family:var(--font);cursor:pointer;">📥 Export Laporan</button>
-        <button id="rptSortBtn" onclick="toggleReportSort()" style="height:40px;padding:0 14px;background:var(--blue-l);color:var(--blue);border:1.5px solid #bfdbfe;border-radius:10px;font-size:12px;font-weight:800;font-family:var(--font);cursor:pointer;white-space:nowrap;">🏠 Per Keluarga</button>
+        <button onclick="openExportModal()" style="flex:1;height:40px;background:var(--green);color:white;border:none;border-radius:10px;font-size:13px;font-weight:800;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">${ikon('unduh')} Export Laporan</button>
+        <button id="rptSortBtn" onclick="toggleReportSort()" style="height:40px;padding:0 14px;background:var(--blue-l);color:var(--blue);border:1.5px solid #bfdbfe;border-radius:10px;font-size:12px;font-weight:800;font-family:var(--font);cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;">${ikon('rumah')} Per Keluarga</button>
       </div></div>
     <div id="rptSelectorMonth" style="display:none;"><select onchange="renderReportBulanan(this.value)" id="reportMonthSelect">${monthOpts}</select></div>
     <div id="rptSelectorYear" style="display:none;"><div style="font-size:14px;font-weight:700;color:var(--ink-2);padding:8px 0;">Rekap Tahun ${TAHUN_AKTIF}</div></div>
     <div id="rptSelectorFollowup" style="display:none;">
       <select onchange="renderReportFollowup(this.value)" id="reportFollowupSelect">${fuOpts}</select>
-      <button onclick="openExportFollowup()" style="width:100%;height:40px;margin-top:10px;background:var(--green);color:white;border:none;border-radius:10px;font-size:13px;font-weight:800;font-family:var(--font);cursor:pointer;">📥 Export Follow-up</button>
+      <button onclick="openExportFollowup()" style="width:100%;height:40px;margin-top:10px;background:var(--green);color:white;border:none;border-radius:10px;font-size:13px;font-weight:800;font-family:var(--font);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">${ikon('unduh')} Export Follow-up</button>
     </div>
   </div><div id="reportBody"></div>`;
   renderReportForDate(latestDate);
@@ -45,7 +45,7 @@ function toggleReportSort() {
     btn.style.background   = reportSortByFamily ? 'var(--blue)' : 'var(--blue-l)';
     btn.style.color        = reportSortByFamily ? 'white' : 'var(--blue)';
     btn.style.borderColor  = '#bfdbfe';
-    btn.textContent        = reportSortByFamily ? '🏠 Per Keluarga ✓' : '🏠 Per Keluarga';
+    btn.innerHTML          = ikon('rumah') + (reportSortByFamily ? ' Per Keluarga ✓' : ' Per Keluarga');
   }
   // Re-render dengan sort baru
   const sel = document.getElementById('reportDateSelect');
@@ -108,8 +108,8 @@ function renderReportBulanan(yearMonth) {
       ${svcs.map(svc => { const r = res[svc]; return `<div class="report-summary-card"><div class="report-summary-num" style="color:var(--teal)">${r.rate}%</div><div class="report-summary-label">${esc(svc)}</div><div class="report-summary-sub">${r.tH} hadir / ${r.dates.length} minggu</div></div>`; }).join('')}
       ${svcs.map(svc => { const r = res[svc]; return `<div class="report-summary-card"><div class="report-summary-num" style="color:var(--green)">${r.perfect.length}</div><div class="report-summary-label">Rajin ${esc(svc)}</div><div class="report-summary-sub">Hadir semua</div></div>`; }).join('')}
     </div>
-    ${svcs.map(svc => kartu(`🚫 Tidak Hadir ${esc(svc)}`, res[svc].never, 'var(--red-l)', 'var(--red)')).join('')}
-    ${svcs.map(svc => kartu(`⭐ Rajin ${esc(svc)}`, res[svc].perfect, 'var(--green-l)', 'var(--green)')).join('')}`;
+    ${svcs.map(svc => kartu(`${ikon('x-bulat')} Tidak Hadir ${esc(svc)}`, res[svc].never, 'var(--red-l)', 'var(--red)')).join('')}
+    ${svcs.map(svc => kartu(`${ikon('bintang')} Rajin ${esc(svc)}`, res[svc].perfect, 'var(--green-l)', 'var(--green)')).join('')}`;
 }
 
 function renderReportTahunan() {
@@ -131,7 +131,7 @@ function renderReportTahunan() {
     md.push({ month: mo, label: BULAN_NAMES[mo], ...sd });
   }
   const hd = md.filter(d => SERVICES.some(svc => d[svc]));
-  if (!hd.length) { body.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">Belum ada data</div></div>'; return; }
+  if (!hd.length) { body.innerHTML = '<div class="empty"><div class="empty-icon">' + ikon('dokumen') + '</div><div class="empty-text">Belum ada data</div></div>'; return; }
   let tH = 0, tS = 0;
   hd.forEach(d => SERVICES.forEach(svc => { if (d[svc]) { tH += d[svc].h; tS += d[svc].t; } }));
   const or = tS ? Math.round(tH / tS * 100) : 0;
@@ -194,7 +194,7 @@ function renderReportForDate(date) {
     // Keluarga A-Z
     Object.keys(families).sort().forEach(fam => {
       html += `<div style="font-size:11px;font-weight:800;color:var(--purple);padding:10px 0 4px;display:flex;align-items:center;gap:5px;border-top:1px solid var(--purple-l);margin-top:4px;">
-        🏠 ${esc(fam)} <span style="font-weight:500;color:var(--ink-4);">(${families[fam].length})</span>
+        ${ikon('rumah')} ${esc(fam)} <span style="font-weight:500;color:var(--ink-4);">(${families[fam].length})</span>
       </div>`;
       families[fam].forEach(m => {
         html += `<div class="report-member-row">
@@ -254,10 +254,10 @@ function renderReportForDate(date) {
         <div class="report-summary-sub">Anak: ${x.anakHadir.length} · Dewasa: ${x.dewasaHadir.length}</div>
       </div>`).join('')}
     </div>
-    ${perIbadah.map(x => kartu(`✗ Absen ${esc(x.ib.nama)}`, x.absen, 'var(--amber-l)', 'var(--amber)')).join('')}
-    ${gabungan ? kartu('🚫 Tidak Hadir Kedua Ibadah', gabungan.tidakHadirSemua, 'var(--red-l)', 'var(--red)') : ''}
-    ${perIbadah.map(x => kartu(`👶 Anak Hadir ${esc(x.ib.nama)}`, x.anakHadir, 'var(--purple-l)', 'var(--purple)')).join('')}
-    ${perIbadah.map(x => kartu(`👥 Dewasa Hadir ${esc(x.ib.nama)}`, x.dewasaHadir, warnaMuda(warna(x)), warna(x))).join('')}
+    ${perIbadah.map(x => kartu(`${ikon('x-bulat')} Absen ${esc(x.ib.nama)}`, x.absen, 'var(--amber-l)', 'var(--amber)')).join('')}
+    ${gabungan ? kartu(ikon('x-bulat') + ' Tidak Hadir Kedua Ibadah', gabungan.tidakHadirSemua, 'var(--red-l)', 'var(--red)') : ''}
+    ${perIbadah.map(x => kartu(`${ikon('anak')} Anak Hadir ${esc(x.ib.nama)}`, x.anakHadir, 'var(--purple-l)', 'var(--purple)')).join('')}
+    ${perIbadah.map(x => kartu(`${ikon('keluarga')} Dewasa Hadir ${esc(x.ib.nama)}`, x.dewasaHadir, warnaMuda(warna(x)), warna(x))).join('')}
     <div style="height:20px;"></div>
   `;
 }
@@ -277,7 +277,7 @@ function renderReportFollowup(refDate) {
   followupExportData = { date: refDate, absenHariIni, absen2Minggu, absen3Minggu, absen4Minggu, absenLebih4, absenLebih8 };
 
   function memberRowsFollowup(list) {
-    if (!list.length) return '<div style="color:var(--green);font-size:13px;padding:8px 0;font-weight:700;">Tidak ada 🎉</div>';
+    if (!list.length) return '<div style="color:var(--green);font-size:13px;padding:8px 0;font-weight:700;">Tidak ada</div>';
     let lastFam = '';
     return list.map((m, i) => {
       let famHeader = '';
@@ -285,10 +285,10 @@ function renderReportFollowup(refDate) {
       if (fam && fam !== lastFam) {
         lastFam = fam;
         famHeader = `<div style="font-size:11px;font-weight:800;color:var(--purple);padding:10px 0 4px;display:flex;align-items:center;gap:5px;${i>0?'border-top:1px solid var(--purple-l);margin-top:4px;':''}">
-          🏠 ${esc(fam)}</div>`;
+          ${ikon('rumah')} ${esc(fam)}</div>`;
       }
       const waBtn = m.hp_wa
-        ? `<a href="https://wa.me/${m.hp_wa.replace(/\D/g,'')}" target="_blank" style="width:32px;height:32px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;text-decoration:none;">💬</a>`
+        ? `<a href="https://wa.me/${m.hp_wa.replace(/\D/g,'')}" target="_blank" style="width:32px;height:32px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;text-decoration:none;color:#fff;">${ikon('pesan')}</a>`
         : `<div style="width:32px;flex-shrink:0;"></div>`;
       return `${famHeader}<div class="report-member-row" style="align-items:center;">
         <div class="report-member-num">${i+1}</div>
@@ -348,7 +348,7 @@ function renderReportFollowup(refDate) {
     <div class="report-card">
       <div class="report-card-header" onclick="this.closest('.report-card').classList.toggle('open')">
         <div class="report-card-title">
-          📋 Absen Minggu Ini
+          ${ikon('daftar')} Absen Minggu Ini
           <span class="report-card-badge" style="background:var(--amber-l);color:var(--amber);">${absenHariIni.length}</span>
         </div>
         <div class="report-card-chevron">▼</div>
@@ -359,7 +359,7 @@ function renderReportFollowup(refDate) {
     <div class="report-card">
       <div class="report-card-header" onclick="this.closest('.report-card').classList.toggle('open')">
         <div class="report-card-title">
-          ⚠️ Absen 2 Minggu
+          ${ikon('peringatan')} Absen 2 Minggu
           <span class="report-card-badge" style="background:var(--red-l);color:var(--red);">${absen2Minggu.length}</span>
         </div>
         <div class="report-card-chevron">▼</div>
@@ -370,7 +370,7 @@ function renderReportFollowup(refDate) {
     <div class="report-card">
       <div class="report-card-header" onclick="this.closest('.report-card').classList.toggle('open')">
         <div class="report-card-title">
-          ⚠️ Absen 3 Minggu
+          ${ikon('peringatan')} Absen 3 Minggu
           <span class="report-card-badge" style="background:var(--red-l);color:var(--red);">${absen3Minggu.length}</span>
         </div>
         <div class="report-card-chevron">▼</div>
@@ -381,7 +381,7 @@ function renderReportFollowup(refDate) {
     <div class="report-card">
       <div class="report-card-header" onclick="this.closest('.report-card').classList.toggle('open')">
         <div class="report-card-title">
-          🚨 Absen 4 Minggu
+          ${ikon('peringatan')} Absen 4 Minggu
           <span class="report-card-badge" style="background:var(--purple-l);color:var(--purple);">${absen4Minggu.length}</span>
         </div>
         <div class="report-card-chevron">▼</div>
@@ -392,7 +392,7 @@ function renderReportFollowup(refDate) {
     <div class="report-card">
       <div class="report-card-header" onclick="this.closest('.report-card').classList.toggle('open')">
         <div class="report-card-title">
-          🚨 Absen lebih dari 4 Minggu
+          ${ikon('peringatan')} Absen lebih dari 4 Minggu
           <span class="report-card-badge" style="background:var(--purple-l);color:var(--purple);">${absenLebih4.length}</span>
         </div>
         <div class="report-card-chevron">▼</div>
@@ -403,7 +403,7 @@ function renderReportFollowup(refDate) {
     <div class="report-card">
       <div class="report-card-header" onclick="this.closest('.report-card').classList.toggle('open')">
         <div class="report-card-title">
-          🔴 Absen lebih dari 8 Minggu
+          ${ikon('peringatan')} Absen lebih dari 8 Minggu
           <span class="report-card-badge" style="background:var(--ink-2);color:white;">${absenLebih8.length}</span>
         </div>
         <div class="report-card-chevron">▼</div>
@@ -456,7 +456,7 @@ function openExportFollowup() {
     el.dataset.catId = cat.id;
     el.innerHTML = `
       <div class="export-cat-check">${count > 0 ? '✓' : ''}</div>
-      <div class="export-cat-icon">${cat.icon}</div>
+      <div class="export-cat-icon">${ikonDariEmoji(cat.icon)}</div>
       <div class="export-cat-label">${cat.label}</div>
       <div class="export-cat-count">${count}</div>`;
     if (count > 0) el.onclick = () => toggleExportCat(cat.id, el);
@@ -574,10 +574,10 @@ function setExportFmt(fmt) {
   document.getElementById('fmtWA').classList.toggle('active', fmt === 'wa');
   const btn = document.getElementById('exportRunBtn');
   if (fmt === 'csv') {
-    btn.textContent = '📥 Download CSV';
+    btn.innerHTML = ikon('unduh') + ' Download CSV';
     btn.style.background = 'var(--green)';
   } else {
-    btn.textContent = '💬 Salin Teks WhatsApp';
+    btn.innerHTML = ikon('pesan') + ' Salin Teks WhatsApp';
     btn.style.background = '#25D366';
   }
 }
@@ -610,7 +610,7 @@ function openExportModal() {
     el.dataset.catId = cat.id;
     el.innerHTML = `
       <div class="export-cat-check">${count > 0 ? '✓' : ''}</div>
-      <div class="export-cat-icon">${cat.icon}</div>
+      <div class="export-cat-icon">${ikonDariEmoji(cat.icon)}</div>
       <div class="export-cat-label">${esc(cat.label)}</div>
       <div class="export-cat-count">${count}</div>`;
     el.onclick = () => toggleExportCat(cat.id, el);
@@ -716,7 +716,7 @@ function openWAPreview(text) {
     .replace(/\*(.*?)\*/g, '<b>$1</b>')
     .replace(/_(.*?)_/g, '<i>$1</i>');
   document.getElementById('waPreviewText').innerHTML = html;
-  document.getElementById('waCopyBtn').textContent = '📋 Salin Teks';
+  document.getElementById('waCopyBtn').innerHTML = ikon('salin') + ' Salin Teks';
   document.getElementById('waCopyBtn').style.background = '#25D366';
   closeModal('modalExport');
   document.getElementById('modalWA').classList.add('open');
@@ -726,10 +726,10 @@ async function copyWAText() {
   try {
     await navigator.clipboard.writeText(waTextContent);
     const btn = document.getElementById('waCopyBtn');
-    btn.textContent = '✅ Tersalin!';
+    btn.innerHTML = ikon('cek-bulat') + ' Tersalin';
     btn.style.background = 'var(--green)';
     setTimeout(() => {
-      btn.textContent = '📋 Salin Teks';
+      btn.innerHTML = ikon('salin') + ' Salin Teks';
       btn.style.background = '#25D366';
     }, 2000);
   } catch {

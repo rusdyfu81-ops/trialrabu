@@ -116,7 +116,7 @@ function renderDashboard() {
 
       <div class="stat-card" onclick="dashFilter('bday')" style="cursor:pointer;" id="dashCardBday">
         <div class="stat-card-num" style="color:var(--purple)">${bdayList.length}</div>
-        <div class="stat-card-label">🎂 Ulang Tahun</div>
+        <div class="stat-card-label">${ikon('kue')} Ulang Tahun</div>
         <div class="stat-card-sub" style="color:var(--ink-4);">Bulan ini</div>
       </div>
     </div>
@@ -230,22 +230,22 @@ function dashFilter(type) {
     const hadir = x.members.filter(m => Logic.hadirPada(RAW, m.id, x.ib.nama, x.lastDate));
     const absen = x.members.filter(m => !Logic.hadirPada(RAW, m.id, x.ib.nama, x.lastDate));
     fc.innerHTML = `
-      <div class="dash-section-title">✅ Hadir ${esc(x.ib.nama)} (${hadir.length})</div>
+      <div class="dash-section-title">${ikon('cek-bulat')} Hadir ${esc(x.ib.nama)} (${hadir.length})</div>
       <div class="alert-list">${memberListHtml(hadir,'var(--green-l)','var(--green)')}</div>
-      <div class="dash-section-title">✗ Absen ${esc(x.ib.nama)} (${absen.length})</div>
+      <div class="dash-section-title">${ikon('x-bulat')} Absen ${esc(x.ib.nama)} (${absen.length})</div>
       <div class="alert-list">${memberListHtml(absen,'var(--red-l)','var(--red)')}</div>`;
 
   // ── Follow-up detail per kategori ──
   } else if (type === 'followup') {
-    if (!d.fuData) { fc.innerHTML = '<div class="empty"><div class="empty-icon">🎉</div><div class="empty-text">Tidak ada yang perlu follow-up</div></div>'; return; }
+    if (!d.fuData) { fc.innerHTML = '<div class="empty"><div class="empty-icon">' + ikon('cek-bulat') + '</div><div class="empty-text">Tidak ada yang perlu follow-up</div></div>'; return; }
     const fu = d.fuData;
     function fuSection(label, icon, list, col, bg) {
       if (!list.length) return '';
-      return `<div class="dash-section-title">${icon} ${label} (${list.length})</div>
+      return `<div class="dash-section-title">${ikonDariEmoji(icon)} ${label} (${list.length})</div>
         <div class="alert-list">
           ${list.map(m => {
             const init = m.nama.trim().split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();
-            const wa = m.hp_wa ? `<a class="alert-wa" href="https://wa.me/${m.hp_wa.replace(/\D/g,'')}" target="_blank">💬</a>` : '';
+            const wa = m.hp_wa ? `<a class="alert-wa" href="https://wa.me/${m.hp_wa.replace(/\D/g,'')}" target="_blank">${ikon('pesan')}</a>` : '';
             return `<div class="alert-card" style="border-left-color:${col};">
               <div class="alert-avatar" style="background:${bg};color:${col};">${esc(init)}</div>
               <div class="alert-info">
@@ -262,19 +262,19 @@ function dashFilter(type) {
       fuSection('Absen 4 Minggu',          '🚨', fu.absen4Minggu, 'var(--purple)', 'var(--purple-l)') +
       fuSection('Absen lebih dari 4 Minggu','🚨', fu.absenLebih4,  'var(--purple)', 'var(--purple-l)') +
       fuSection('Absen lebih dari 8 Minggu','🔴', fu.absenLebih8,  'var(--ink-2)',  'var(--bg)') ||
-      '<div class="empty"><div class="empty-icon">🎉</div><div class="empty-text">Tidak ada</div></div>';
+      '<div class="empty"><div class="empty-icon">' + ikon('cek-bulat') + '</div><div class="empty-text">Tidak ada</div></div>';
 
   // ── Ulang tahun detail ──
   } else if (type === 'bday') {
     fc.innerHTML = `
-      <div class="dash-section-title">🎂 Ulang Tahun ${BULAN_FULL[d.bulanIni]} (${d.bdayList.length})</div>
+      <div class="dash-section-title">${ikon('kue')} Ulang Tahun ${BULAN_FULL[d.bulanIni]} (${d.bdayList.length})</div>
       <div class="bday-list">
         ${d.bdayList.length ? d.bdayList.map(m => {
           const iso = Logic.normTglLahir(m.tgl_lahir);
           const tgl = iso ? iso.slice(8, 10) + '/' + iso.slice(5, 7) : '—';
-          const wa  = m.hp_wa ? `<a class="alert-wa" href="https://wa.me/${m.hp_wa.replace(/\D/g,'')}" target="_blank">💬</a>` : '';
+          const wa  = m.hp_wa ? `<a class="alert-wa" href="https://wa.me/${m.hp_wa.replace(/\D/g,'')}" target="_blank">${ikon('pesan')}</a>` : '';
           return `<div class="bday-card" style="display:flex;align-items:center;gap:12px;">
-            <div class="bday-avatar">🎂</div>
+            <div class="bday-avatar">${ikon('kue')}</div>
             <div style="flex:1;min-width:0;">
               <div class="bday-name">${esc(tc(m.nama))}</div>
               <div class="bday-komisi">${esc(m.komisi)} · ${tgl}</div>
@@ -298,9 +298,9 @@ function dashFilter(type) {
         <div class="dash-section-title" style="margin:0;">Komisi ${esc(komisiName)}</div>
         <div style="font-size:20px;font-weight:900;font-family:var(--mono);color:${col};">${pct}%</div>
       </div>
-      <div class="dash-section-title">✅ Hadir (${hadir.length})</div>
+      <div class="dash-section-title">${ikon('cek-bulat')} Hadir (${hadir.length})</div>
       <div class="alert-list">${memberListHtml(hadir,'var(--green-l)','var(--green)')}</div>
-      <div class="dash-section-title">✗ Absen (${absen.length})</div>
+      <div class="dash-section-title">${ikon('x-bulat')} Absen (${absen.length})</div>
       <div class="alert-list">${memberListHtml(absen,'var(--red-l)','var(--red)')}</div>`;
   }
 }
@@ -313,7 +313,7 @@ function memberListHtml(members, bgColor, textColor) {
       <div class="alert-avatar" style="background:${bgColor};color:${textColor};">${esc(init)}</div>
       <div class="alert-info">
         <div class="alert-name">${esc(tc(m.nama))}</div>
-        <div class="alert-detail" style="color:var(--ink-3);">${esc(m.komisi)}${m.keluarga_nama ? ' · 🏠 ' + esc(tc(m.keluarga_nama)) : ''}</div>
+        <div class="alert-detail" style="color:var(--ink-3);">${esc(m.komisi)}${m.keluarga_nama ? ' · ' + ikon('rumah') + ' ' + esc(tc(m.keluarga_nama)) : ''}</div>
       </div>
     </div>`;
   }).join('');

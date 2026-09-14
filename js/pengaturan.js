@@ -26,7 +26,7 @@ async function changePin() {
     const tersimpan = await DB.getPinHash();
     if (!tersimpan || tersimpan !== await sha256(oldPin)) {
       showToast('❌ PIN lama salah', 'error');
-      btn.disabled = false; btn.textContent = '🔒 Ganti PIN';
+      btn.disabled = false; btn.innerHTML = ikon('gembok') + ' Ganti PIN';
       return;
     }
     await DB.setPinHash(await sha256(newPin));
@@ -38,7 +38,7 @@ async function changePin() {
     appLog('error', 'changePin', err.message, err.stack);
     showToast('❌ Gagal: ' + pesanError(err), 'error');
   }
-  btn.disabled = false; btn.textContent = '🔒 Ganti PIN';
+  btn.disabled = false; btn.innerHTML = ikon('gembok') + ' Ganti PIN';
 }
 
 // ── TAHUN AKTIF ───────────────────────────────────────────────
@@ -85,10 +85,10 @@ function updateFabBackupSub() {
   const el = document.getElementById('fabBackupSub');
   if (!el) return;
   const last = getLastBackupDate();
-  if (!last) { el.textContent = '⚠️ Belum pernah backup!'; return; }
+  if (!last) { el.textContent = 'Belum pernah backup!'; return; }
   const daysDiff = Math.floor((Date.now() - new Date(last).getTime()) / 86400000);
   if (daysDiff >= BACKUP_INTERVAL_DAYS) {
-    el.textContent = `⚠️ Terakhir ${daysDiff} hari lalu`;
+    el.textContent = `Terakhir ${daysDiff} hari lalu — segera backup`;
   } else {
     el.textContent = `Terakhir ${daysDiff === 0 ? 'hari ini' : daysDiff + ' hari lalu'}`;
   }
@@ -148,7 +148,7 @@ function bacaFileImport(input) {
     } catch (e) {
       hasilImport = null;
       const pesan = e instanceof SyntaxError ? 'File bukan JSON yang valid.' : e.message;
-      el.innerHTML = `<div style="color:var(--red);font-size:13px;padding:10px 0;">❌ ${esc(pesan)}</div>`;
+      el.innerHTML = `<div style="color:var(--red);font-size:13px;padding:10px 0;display:flex;gap:6px;align-items:center;">${ikon('x-bulat')} ${esc(pesan)}</div>`;
       return;
     }
     let sudahAda = false;
@@ -157,13 +157,13 @@ function bacaFileImport(input) {
     const p = hasilImport.peringatan;
     el.innerHTML = `
       <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-top:10px;font-size:13px;line-height:1.7;">
-        <div style="font-weight:800;margin-bottom:4px;">📄 ${esc(file.name)}</div>
-        <div>👤 ${r.jemaat} jemaat</div>
-        <div>📋 ${r.absensi} baris absensi → ${r.sesi} tanggal ibadah</div>
-        ${p.length ? `<div style="margin-top:8px;color:var(--amber);font-weight:700;">⚠️ ${p.length} peringatan:</div>
+        <div style="font-weight:800;margin-bottom:4px;display:flex;gap:6px;align-items:center;">${ikon('dokumen')} ${esc(file.name)}</div>
+        <div style="display:flex;gap:6px;align-items:center;">${ikon('keluarga')} ${r.jemaat} jemaat</div>
+        <div style="display:flex;gap:6px;align-items:center;">${ikon('daftar')} ${r.absensi} baris absensi → ${r.sesi} tanggal ibadah</div>
+        ${p.length ? `<div style="margin-top:8px;color:var(--amber);font-weight:700;display:flex;gap:6px;align-items:center;">${ikon('peringatan')} ${p.length} peringatan:</div>
           <ul style="margin:4px 0 0 18px;color:var(--ink-3);font-size:12px;">${p.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
         ${sudahAda ? `<div style="margin-top:8px;color:var(--red);font-weight:700;">Firebase sudah berisi data. Jemaat & tanggal yang ada di file ini akan MENGGANTIKAN data yang sama di Firebase.</div>` : ''}
-        <button class="form-btn" id="importRunBtn" style="margin-top:10px;" onclick="jalankanImport()">📥 Import Sekarang</button>
+        <button class="form-btn" id="importRunBtn" style="margin-top:10px;" onclick="jalankanImport()">${ikon('unggah')} Import Sekarang</button>
       </div>`;
   };
   reader.readAsText(file);
@@ -180,13 +180,13 @@ async function jalankanImport() {
     await DB.importBackup(hasilImport, (a, b) => { btn.textContent = `Mengimport... ${a}/${b}`; });
     hasilImport = null;
     document.getElementById('importPreview').innerHTML =
-      '<div style="color:var(--green);font-size:13px;font-weight:700;padding:10px 0;">✅ Import selesai. Data tampil otomatis.</div>';
+      '<div style="color:var(--green);font-size:13px;font-weight:700;padding:10px 0;display:flex;gap:6px;align-items:center;">' + ikon('cek-bulat') + ' Import selesai. Data tampil otomatis.</div>';
     showToast('✅ Import selesai', 'success');
   } catch (e) {
     appLog('error', 'jalankanImport', e.message, e.stack);
     showToast('❌ Import gagal: ' + pesanError(e), 'error');
     btn.disabled = false;
-    btn.textContent = '📥 Import Sekarang';
+    btn.innerHTML = ikon('unggah') + ' Import Sekarang';
   }
 }
 
@@ -236,7 +236,7 @@ async function loadLogViewer() {
   try {
     const logs = await DB.listLogs(50);
     if (!logs.length) {
-      el.innerHTML = '<div style="color:var(--ink-4);font-size:13px;text-align:center;padding:20px 0;">✅ Tidak ada error tercatat</div>';
+      el.innerHTML = '<div style="color:var(--ink-4);font-size:13px;text-align:center;padding:20px 0;">Tidak ada error tercatat</div>';
       return;
     }
     el.innerHTML = logs.map(log => {
@@ -261,7 +261,7 @@ async function loadLogViewer() {
       </div>`;
     }).join('');
   } catch (e) {
-    el.innerHTML = `<div style="color:var(--red);font-size:13px;padding:12px 0;">❌ Gagal muat log: ${esc(pesanError(e))}</div>`;
+    el.innerHTML = `<div style="color:var(--red);font-size:13px;padding:12px 0;">Gagal muat log: ${esc(pesanError(e))}</div>`;
   }
 }
 

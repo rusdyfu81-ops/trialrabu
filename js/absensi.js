@@ -5,7 +5,7 @@ function ibadahAktif() { return IBADAH[currentService]; }
 // Tab ibadah dibangun dari daftar IBADAH (config.js)
 function buatTabIbadah() {
   document.getElementById('serviceTabs').innerHTML = IBADAH.map((ib, i) =>
-    `<div class="service-tab${i === currentService ? ' active' : ''}" id="svcTab${i}" onclick="setService(${i})">${esc(ib.label)}</div>`
+    `<div class="service-tab${i === currentService ? ' active' : ''}" id="svcTab${i}" onclick="setService(${i})">${ikon(ib.ikon)}<span>${esc(ib.label)}</span></div>`
   ).join('');
 }
 
@@ -83,9 +83,9 @@ function initAttPage() {
   // Keluarga filter — normalisasi uppercase, deduplicate
   const allKeluarga = [...new Set(members.map(m => u(m.keluarga_nama)).filter(Boolean))].sort();
   const kf = document.getElementById('keluargaFilter');
-  kf.innerHTML = `<div class="filter-chip active" onclick="setKeluarga('',this)" style="border-color:var(--purple);color:var(--purple);">👨‍👩‍👧‍👦 Semua</div>`;
-  kf.innerHTML += `<div class="filter-chip${sortByKeluarga ? ' active' : ''}" onclick="toggleSortKeluarga(this)" style="border-color:var(--blue);${sortByKeluarga ? 'background:var(--blue);color:white;' : 'color:var(--blue);'}" id="sortKeluargaChip">↕ Sort: Keluarga</div>`;
-  kf.innerHTML += `<div class="filter-chip" onclick="toggleNonAktif(this)" id="nonAktifChip" style="border-color:var(--amber);color:var(--amber);">👁 Non-Aktif / Kuliah</div>`;
+  kf.innerHTML = `<div class="filter-chip active" onclick="setKeluarga('',this)" style="border-color:var(--purple);color:var(--purple);">${ikon('keluarga')} Semua</div>`;
+  kf.innerHTML += `<div class="filter-chip${sortByKeluarga ? ' active' : ''}" onclick="toggleSortKeluarga(this)" style="border-color:var(--blue);${sortByKeluarga ? 'background:var(--blue);color:white;' : 'color:var(--blue);'}" id="sortKeluargaChip">${ikon('urut')} Sort: Keluarga</div>`;
+  kf.innerHTML += `<div class="filter-chip" onclick="toggleNonAktif(this)" id="nonAktifChip" style="border-color:var(--amber);color:var(--amber);">${ikon('mata-tutup')} Non-Aktif / Kuliah</div>`;
   allKeluarga.forEach(k => {
     kf.innerHTML += `<div class="filter-chip" onclick="setKeluarga('${esc(k)}',this)">${esc(k)}</div>`;
   });
@@ -165,7 +165,7 @@ function loadAttState() {
     ['statHadir', 'statAbsen', 'statTotal'].forEach(id => { document.getElementById(id).textContent = '0'; });
     document.getElementById('navBadge').textContent = '—';
     document.getElementById('memberList').innerHTML =
-      '<div class="empty"><div class="empty-icon">📅</div><div class="empty-text">Belum ada tanggal ibadah. Tekan ＋ → Tanggal Ibadah Baru.</div></div>';
+      '<div class="empty"><div class="empty-icon">' + ikon('kalender') + '</div><div class="empty-text">Belum ada tanggal ibadah. Tekan ＋ → Tanggal Ibadah Baru.</div></div>';
     return;
   }
   const svcName = SERVICES[currentService];
@@ -214,7 +214,7 @@ function toggleNonAktif(el) {
 function toggleSortKeluarga(el) {
   sortByKeluarga = !sortByKeluarga;
   el.classList.toggle('active', sortByKeluarga);
-  el.textContent = sortByKeluarga ? '↕ Sort: Keluarga' : '↕ Sort Keluarga';
+  el.innerHTML = ikon('urut') + (sortByKeluarga ? ' Sort: Keluarga' : ' Sort Keluarga');
   el.style.background = sortByKeluarga ? 'var(--blue)' : '';
   el.style.color = sortByKeluarga ? 'white' : 'var(--blue)';
   el.style.borderColor = 'var(--blue)';
@@ -291,12 +291,12 @@ function renderMembers() {
   // Banner saat mode non-aktif aktif
   const bannerHtml = showNonAktif
     ? `<div style="background:var(--amber-l);border:1.5px solid var(--amber);border-radius:10px;padding:10px 14px;margin-bottom:8px;font-size:12px;font-weight:700;color:var(--amber);">
-        👁 Mode Non-Aktif — Tap nama untuk Edit → ubah Status ke <b>Aktif</b> untuk mengaktifkan kembali. Tap chip <b>Non-Aktif / Kuliah</b> lagi untuk kembali ke daftar normal.
+        ${ikon('mata-tutup')} Mode Non-Aktif — Tap nama untuk Edit → ubah Status ke <b>Aktif</b> untuk mengaktifkan kembali. Tap chip <b>Non-Aktif / Kuliah</b> lagi untuk kembali ke daftar normal.
        </div>`
     : '';
 
   if (!filtered.length) {
-    list.innerHTML = bannerHtml + '<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Tidak ditemukan</div></div>';
+    list.innerHTML = bannerHtml + '<div class="empty"><div class="empty-icon">' + ikon('cari') + '</div><div class="empty-text">Tidak ditemukan</div></div>';
     return;
   }
 
@@ -308,9 +308,7 @@ function renderMembers() {
       const fam = u(m.keluarga_nama) || 'TANPA KELUARGA';
       if (fam !== lastKeluarga) {
         lastKeluarga = fam;
-        keluargaHeader = `<div style="font-size:12px;font-weight:800;color:var(--purple);padding:12px 0 4px;display:flex;align-items:center;gap:6px;${idx>0?'margin-top:8px;border-top:2px solid var(--purple-l);padding-top:16px;':''}">
-          <span>🏠</span> ${esc(fam)}
-        </div>`;
+        keluargaHeader = `<div class="fam-head${idx>0?' pisah':''}">${ikon('rumah')} ${esc(fam)}</div>`;
       }
     }
 
@@ -346,13 +344,13 @@ function renderMembers() {
       <div class="member-info" onclick="openMemberDetail(${m.id})">
         <div class="member-name">
           ${esc(tc(m.nama))}
-          ${isBday ? '<span class="birthday-badge">🎂</span>' : ''}
+          ${isBday ? '<span class="birthday-badge">' + ikon('kue') + '</span>' : ''}
         </div>
         <div class="member-meta">
           <span>${esc(m.komisi)}</span>
           <span style="color:${rateColor}" class="member-rate">${rate}%</span>
           ${showNonAktif && m.status ? `<span class="status-badge ${(m.status||'').toLowerCase().replace('-','')}">${esc(m.status)}</span>` : ''}
-          ${streak >= 3 && !isHadir ? `<span class="absen-streak">⚠️ ${streak}x absen</span>` : ''}
+          ${streak >= 3 && !isHadir ? `<span class="absen-streak">${ikon('peringatan')} ${streak}x absen</span>` : ''}
         </div>
       </div>
       <div class="toggle-wrap">
@@ -457,20 +455,19 @@ function openMemberDetail(jid) {
   }).join('');
 
   const waBtn = m.hp_wa
-    ? `<a class="wa-btn" href="https://wa.me/${m.hp_wa.replace(/\D/g,'')}" target="_blank">💬 WhatsApp ${esc(m.nama.split(' ')[0])}</a>`
+    ? `<a class="wa-btn" href="https://wa.me/${m.hp_wa.replace(/\D/g,'')}" target="_blank">${ikon('pesan')} WhatsApp ${esc(m.nama.split(' ')[0])}</a>`
     : '';
 
   const namaLengkap  = m.nama_lengkap && m.nama_lengkap !== m.nama ? esc(m.nama_lengkap) : '';
-  const keluargaInfo = m.keluarga_nama ? `🏠 ${esc(m.keluarga_nama)}` : '';
-  const tglLahirInfo = m.tgl_lahir ? `${isBday ? '🎂' : '📅'} ${esc(Logic.tampilTglLahir(m.tgl_lahir))}${isBday ? ' — Ulang Tahun Bulan Ini!' : ''}` : '';
-  const jenisKel     = m.jenis_kelamin ? (m.jenis_kelamin === 'Laki-laki' ? '👨' : '👩') + ' ' + esc(m.jenis_kelamin) : '';
+  const keluargaInfo = m.keluarga_nama ? `${ikon('rumah')} ${esc(m.keluarga_nama)}` : '';
+  const tglLahirInfo = m.tgl_lahir ? `${ikon(isBday ? 'kue' : 'kalender')} ${esc(Logic.tampilTglLahir(m.tgl_lahir))}${isBday ? ' — Ulang Tahun Bulan Ini!' : ''}` : '';
+  const jenisKel     = m.jenis_kelamin ? ikon('orang') + ' ' + esc(m.jenis_kelamin) : '';
 
-  const statusIcon = {'Aktif':'✅','Non-Aktif':'⏸️','Kuliah':'🎓','Meninggal':'🕊️'}[m.status] || '';
-  const statusLabel = m.status && m.status !== 'Aktif' ? `<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:${m.status==='Meninggal'?'var(--ink-4)':m.status==='Kuliah'?'var(--blue-l)':'var(--amber-l)'};color:${m.status==='Meninggal'?'white':m.status==='Kuliah'?'var(--blue)':'var(--amber)'};">${statusIcon} ${esc(m.status)}</span>` : '';
+  const statusLabel = m.status && m.status !== 'Aktif' ? `<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:${m.status==='Meninggal'?'var(--ink-4)':m.status==='Kuliah'?'var(--blue-l)':'var(--amber-l)'};color:${m.status==='Meninggal'?'white':m.status==='Kuliah'?'var(--blue)':'var(--amber)'};">${esc(m.status)}</span>` : '';
 
   document.getElementById('modalMemberBody').innerHTML = `
     <div class="member-detail-header">
-      <div class="member-detail-avatar ${isBday?'':''+avatarClass(m.nama)}" style="${isBday?'background:var(--purple)':''}">${isBday?'🎂':esc(initials)}</div>
+      <div class="member-detail-avatar ${isBday?'':''+avatarClass(m.nama)}" style="${isBday?'background:var(--purple)':''}">${isBday?ikon('kue'):esc(initials)}</div>
       <div style="flex:1;min-width:0;">
         <div class="member-detail-name">${esc(tc(m.nama))} ${statusLabel}</div>
         ${namaLengkap ? `<div style="font-size:12px;color:var(--ink-3);margin-top:1px;">${namaLengkap}</div>` : ''}
@@ -500,7 +497,7 @@ function openMemberDetail(jid) {
     <div style="font-size:12px;font-weight:800;color:var(--ink-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Riwayat</div>
     ${historyRows || '<div style="color:var(--ink-4);font-size:13px;padding:12px 0;">Belum ada data</div>'}
     ${waBtn}
-    <button onclick="openEditProfile(${m.id})" style="width:100%;height:48px;background:var(--ink);color:white;border-radius:12px;border:none;font-size:15px;font-weight:800;font-family:var(--font);cursor:pointer;margin-top:8px;transition:all .2s;">✏️ Edit Profil</button>
+    <button onclick="openEditProfile(${m.id})" style="width:100%;height:48px;background:var(--ink);color:white;border-radius:12px;border:none;font-size:15px;font-weight:800;font-family:var(--font);cursor:pointer;margin-top:8px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;">${ikon('pensil')} Edit Profil</button>
     <div style="height:4px;"></div>`;
 
   document.getElementById('modalMember').classList.add('open');
@@ -619,7 +616,7 @@ function updateSubmitBar() {
   const bar = document.getElementById('submitBar');
   const btn = document.getElementById('submitBtn');
   bar.style.display = n > 0 ? 'block' : 'none';
-  btn.textContent = `💾 Simpan ${n} perubahan`;
+  btn.innerHTML = `${ikon('simpan')} Simpan ${n} perubahan`;
   btn.title = 'Atau akan tersimpan otomatis saat ganti halaman';
 }
 
